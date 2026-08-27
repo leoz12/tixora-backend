@@ -1,0 +1,1718 @@
+basePath: /api
+definitions:
+  tixora_internal_dto.AdminAuthResponse:
+    properties:
+      admin:
+        $ref: '#/definitions/tixora_internal_dto.AdminResponse'
+    type: object
+  tixora_internal_dto.AdminLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  tixora_internal_dto.AdminResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  tixora_internal_dto.AuthResponse:
+    properties:
+      user:
+        $ref: '#/definitions/tixora_internal_dto.UserResponse'
+    type: object
+  tixora_internal_dto.CategoryRequest:
+    properties:
+      is_active:
+        type: boolean
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  tixora_internal_dto.CategoryResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  tixora_internal_dto.CreateAdminRequest:
+    properties:
+      email:
+        type: string
+      name:
+        minLength: 3
+        type: string
+      password:
+        minLength: 8
+        type: string
+      role:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  tixora_internal_dto.CreateOrderRequest:
+    properties:
+      buyer_email:
+        type: string
+      buyer_name:
+        minLength: 3
+        type: string
+      event_id:
+        type: string
+      quantity:
+        maximum: 100
+        minimum: 1
+        type: integer
+    required:
+    - buyer_email
+    - buyer_name
+    - event_id
+    - quantity
+    type: object
+  tixora_internal_dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  tixora_internal_dto.EventRequest:
+    properties:
+      category_id:
+        type: string
+      description:
+        type: string
+      event_date:
+        type: string
+      image_id:
+        type: string
+      location:
+        type: string
+      price:
+        minimum: 0
+        type: integer
+      title:
+        maxLength: 255
+        minLength: 3
+        type: string
+      total_tickets:
+        minimum: 1
+        type: integer
+    required:
+    - category_id
+    - event_date
+    - location
+    - price
+    - title
+    - total_tickets
+    type: object
+  tixora_internal_dto.EventResponse:
+    properties:
+      admin_fee:
+        type: integer
+      available_tickets:
+        type: integer
+      category:
+        $ref: '#/definitions/tixora_internal_dto.CategoryResponse'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      event_date:
+        type: string
+      id:
+        type: string
+      image_url:
+        type: string
+      location:
+        type: string
+      price:
+        type: integer
+      title:
+        type: string
+      total_tickets:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  tixora_internal_dto.GoogleCallbackRequest:
+    properties:
+      code:
+        type: string
+    required:
+    - code
+    type: object
+  tixora_internal_dto.ListResponse:
+    properties:
+      data: {}
+      pagination:
+        $ref: '#/definitions/tixora_internal_dto.Pagination'
+      success:
+        type: boolean
+    type: object
+  tixora_internal_dto.MidtransWebhookRequest:
+    properties:
+      fraud_status:
+        type: string
+      gross_amount:
+        type: string
+      order_id:
+        type: string
+      payment_type:
+        type: string
+      signature_key:
+        type: string
+      status_code:
+        type: string
+      transaction_id:
+        type: string
+      transaction_status:
+        type: string
+    required:
+    - gross_amount
+    - order_id
+    - signature_key
+    - status_code
+    - transaction_id
+    - transaction_status
+    type: object
+  tixora_internal_dto.OrderResponse:
+    properties:
+      admin_fee:
+        type: integer
+      buyer_email:
+        type: string
+      buyer_name:
+        type: string
+      created_at:
+        type: string
+      event_date:
+        type: string
+      event_description:
+        type: string
+      event_id:
+        type: string
+      event_image:
+        type: string
+      event_location:
+        type: string
+      event_title:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      paid_at:
+        type: string
+      payment_method:
+        type: string
+      payment_url:
+        type: string
+      purchased_at:
+        type: string
+      quantity:
+        type: integer
+      snap_token:
+        type: string
+      status:
+        type: string
+      subtotal:
+        type: integer
+      ticket_reference:
+        type: string
+      total_price:
+        type: integer
+      unit_price:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+  tixora_internal_dto.OrderStatusResponse:
+    properties:
+      expires_at:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      paid_at:
+        type: string
+      status:
+        type: string
+    type: object
+  tixora_internal_dto.Pagination:
+    properties:
+      current_page:
+        type: integer
+      per_page:
+        type: integer
+      total_items:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  tixora_internal_dto.PaymentStatusResponse:
+    properties:
+      amount:
+        type: integer
+      order_id:
+        type: string
+      status:
+        type: string
+      transaction_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  tixora_internal_dto.PresignUploadRequest:
+    properties:
+      filename:
+        type: string
+      mime_type:
+        type: string
+      size:
+        minimum: 1
+        type: integer
+    required:
+    - filename
+    - mime_type
+    - size
+    type: object
+  tixora_internal_dto.PresignUploadResponse:
+    properties:
+      expires_in_seconds:
+        type: integer
+      file_id:
+        type: string
+      upload_url:
+        type: string
+    type: object
+  tixora_internal_dto.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  tixora_internal_dto.UpdateAdminRequest:
+    properties:
+      name:
+        minLength: 3
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    required:
+    - name
+    type: object
+  tixora_internal_dto.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        type: string
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  tixora_internal_dto.UserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    name: Tixora Support
+  description: REST API for the Tixora event ticket marketplace.
+  license:
+    name: Proprietary
+  title: Tixora API
+  version: "1.0"
+paths:
+  /admin/admins:
+    get:
+      description: Returns a paginated list of admins.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.AdminResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List admins
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Creates a new admin account.
+      parameters:
+      - description: New admin details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.CreateAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AdminResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create admin
+      tags:
+      - admin
+  /admin/admins/{id}:
+    delete:
+      description: Deletes an admin account.
+      parameters:
+      - description: Admin ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete admin
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing admin account.
+      parameters:
+      - description: Admin ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Admin fields to update
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.UpdateAdminRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AdminResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update admin
+      tags:
+      - admin
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates an admin with email and password. Sets httpOnly access/refresh
+        cookies.
+      parameters:
+      - description: Admin credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AdminAuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Admin login
+      tags:
+      - admin
+  /admin/auth/logout:
+    post:
+      description: Revokes the current admin refresh token and clears session cookies.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+      summary: Admin logout
+      tags:
+      - admin
+  /admin/auth/me:
+    get:
+      description: Returns the profile of the currently authenticated admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AdminResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get current admin
+      tags:
+      - admin
+  /admin/auth/refresh:
+    post:
+      description: Rotates the admin refresh token cookie and issues a new access
+        token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AdminAuthResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Refresh admin session
+      tags:
+      - admin
+  /admin/orders:
+    get:
+      description: Returns a paginated list of orders across all users. Requires admin
+        authentication.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 12
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by order status (pending, paid, expired, cancelled)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List all orders
+      tags:
+      - admin
+  /admin/orders/{id}:
+    get:
+      description: Returns a single order by its order ID, regardless of owner. Requires
+        admin authentication.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get order detail (admin)
+      tags:
+      - admin
+  /admin/users:
+    get:
+      description: Returns a paginated list of registered users. Requires admin authentication.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by name or email
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.UserResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List customers
+      tags:
+      - admin
+  /admin/users/{id}:
+    get:
+      description: Returns a single user by ID. Requires admin authentication.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.UserResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get customer detail
+      tags:
+      - admin
+  /auth/logout:
+    post:
+      description: Revokes the current refresh token and clears session cookies.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+      summary: Logout
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: Returns the profile of the currently authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.UserResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Get current user
+      tags:
+      - auth
+  /auth/oauth/google/callback:
+    post:
+      consumes:
+      - application/json
+      description: Exchanges a Google OAuth authorization code for a Tixora session
+        (creates the user if needed). Sets httpOnly access/refresh cookies.
+      parameters:
+      - description: Google OAuth code
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.GoogleCallbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Login with Google OAuth
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Rotates the refresh token cookie and issues a new access token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.AuthResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Refresh session
+      tags:
+      - auth
+  /categories:
+    get:
+      description: Returns the list of event categories. Inactive categories are excluded
+        unless include_inactive=true.
+      parameters:
+      - description: Include inactive categories
+        in: query
+        name: include_inactive
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.CategoryResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: List categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new event category. Requires admin authentication.
+      parameters:
+      - description: Category details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.CategoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      description: Deletes an event category. Fails if the category is still used
+        by existing events. Requires admin authentication.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete category
+      tags:
+      - categories
+    get:
+      description: Returns a single category by its ID.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.CategoryResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Get category by ID
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing event category. Requires admin authentication.
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Category details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.CategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.CategoryResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update category
+      tags:
+      - categories
+  /events:
+    get:
+      description: Returns a paginated list of events, optionally filtered by category
+        and/or a free-text search on title/location.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 12
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Exact category ID filter
+        in: query
+        name: category_id
+        type: string
+      - description: Free-text search on title/location
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.EventResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: List events
+      tags:
+      - events
+    post:
+      consumes:
+      - application/json
+      description: Creates a new event. Requires admin authentication.
+      parameters:
+      - description: Event details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.EventRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.EventResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create event
+      tags:
+      - events
+  /events/{id}:
+    delete:
+      description: Deletes an event. Requires admin authentication.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Delete event
+      tags:
+      - events
+    get:
+      description: Returns a single event by its ID.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.EventResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Get event by ID
+      tags:
+      - events
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing event. Requires admin authentication.
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Event details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.EventRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.EventResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update event
+      tags:
+      - events
+  /events/search:
+    get:
+      description: Searches events by a free-text query.
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 12
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.EventResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Search events
+      tags:
+      - events
+  /files/presign-upload:
+    post:
+      consumes:
+      - application/json
+      description: Registers a pending file record and returns a presigned R2 URL.
+        The client uploads the file bytes directly to that URL (PUT, with the same
+        Content-Type), then references the returned file_id when creating/updating
+        the owning resource (e.g. an event's image_id). Requires admin authentication.
+      parameters:
+      - description: Upload metadata
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.PresignUploadRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.PresignUploadResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Request a direct upload URL
+      tags:
+      - files
+  /orders:
+    get:
+      description: Returns a paginated list of orders belonging to the authenticated
+        user.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 12
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by order status (pending, paid, expired, cancelled)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.ListResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: List my orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Creates a new ticket order for the authenticated user.
+      parameters:
+      - description: Order details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Create order
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      description: Returns a single order owned by the authenticated user.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get order by ID
+      tags:
+      - orders
+  /orders/{id}/cancel:
+    post:
+      description: Cancels a pending order owned by the authenticated user and releases
+        its reserved tickets.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Cancel order
+      tags:
+      - orders
+  /orders/{id}/pay:
+    post:
+      description: Returns the payment URL/Snap token for a pending order owned by
+        the authenticated user, so they can resume an interrupted payment.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.OrderResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Continue payment
+      tags:
+      - orders
+  /orders/{id}/status:
+    get:
+      description: Returns a lightweight status view of an order, intended for polling.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.OrderStatusResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get order status
+      tags:
+      - orders
+  /orders/{id}/ticket/download:
+    get:
+      description: Returns a PDF e-ticket for a paid order owned by the authenticated
+        user.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Download e-ticket
+      tags:
+      - orders
+  /payments/status/{transactionId}:
+    get:
+      description: Returns the status of a payment transaction owned by the authenticated
+        user.
+      parameters:
+      - description: Midtrans transaction ID
+        in: path
+        name: transactionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.PaymentStatusResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get payment status
+      tags:
+      - payments
+  /payments/webhook:
+    post:
+      consumes:
+      - application/json
+      description: Receives asynchronous payment notifications from Midtrans. Authenticated
+        via the Midtrans signature key, not a bearer token.
+      parameters:
+      - description: Midtrans notification payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.MidtransWebhookRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      summary: Midtrans payment webhook
+      tags:
+      - payments
+  /user/profile:
+    get:
+      description: Returns the profile of the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.UserResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get profile
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Updates the profile of the authenticated user.
+      parameters:
+      - description: Profile fields
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Update profile
+      tags:
+      - user
+securityDefinitions:
+  CookieAuth:
+    description: httpOnly access token cookie, set automatically on login (see /auth/oauth/google/callback,
+      /admin/auth/login).
+    in: cookie
+    name: tx_access_token
+    type: apiKey
+swagger: "2.0"
