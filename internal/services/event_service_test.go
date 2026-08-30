@@ -20,12 +20,12 @@ func newEventService(eventRepo *mockEventRepo, categoryRepo *mockCategoryRepo, f
 
 func TestEventService_GetEvents_DefaultsInvalidPagination(t *testing.T) {
 	eventRepo := new(mockEventRepo)
-	eventRepo.On("GetWithPagination", mock.Anything, 0, 12, "", "").
+	eventRepo.On("GetWithPagination", mock.Anything, 0, 12, "", "", true).
 		Return([]models.Event{{ID: "evt-1"}}, 1, nil)
 
 	svc := newEventService(eventRepo, new(mockCategoryRepo), new(mockFileRepo))
 
-	events, total, err := svc.GetEvents(context.Background(), 0, 0, "", "")
+	events, total, err := svc.GetEvents(context.Background(), 0, 0, "", "", true)
 	require.NoError(t, err)
 	assert.Len(t, events, 1)
 	assert.EqualValues(t, 1, total)
@@ -34,12 +34,12 @@ func TestEventService_GetEvents_DefaultsInvalidPagination(t *testing.T) {
 
 func TestEventService_GetEvents_ClampsOversizedLimit(t *testing.T) {
 	eventRepo := new(mockEventRepo)
-	eventRepo.On("GetWithPagination", mock.Anything, 0, 12, "", "").
+	eventRepo.On("GetWithPagination", mock.Anything, 0, 12, "", "", false).
 		Return([]models.Event{}, 0, nil)
 
 	svc := newEventService(eventRepo, new(mockCategoryRepo), new(mockFileRepo))
 
-	_, _, err := svc.GetEvents(context.Background(), 1, 500, "", "")
+	_, _, err := svc.GetEvents(context.Background(), 1, 500, "", "", false)
 	require.NoError(t, err)
 	eventRepo.AssertExpectations(t)
 }
@@ -47,7 +47,7 @@ func TestEventService_GetEvents_ClampsOversizedLimit(t *testing.T) {
 func TestEventService_SearchEvents_EmptyQueryRejected(t *testing.T) {
 	svc := newEventService(new(mockEventRepo), new(mockCategoryRepo), new(mockFileRepo))
 
-	_, _, err := svc.SearchEvents(context.Background(), "", 1, 12)
+	_, _, err := svc.SearchEvents(context.Background(), "", 1, 12, true)
 	assert.ErrorIs(t, err, utils.ErrInvalidInput)
 }
 

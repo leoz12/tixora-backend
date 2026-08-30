@@ -366,6 +366,13 @@ definitions:
       updated_at:
         type: string
     type: object
+  tixora_internal_dto.UserStatsResponse:
+    properties:
+      total_orders:
+        type: integer
+      total_spent:
+        type: integer
+    type: object
 host: localhost:8000
 info:
   contact:
@@ -1079,6 +1086,11 @@ paths:
         in: query
         name: search
         type: string
+      - default: true
+        description: Include events whose date has already passed
+        in: query
+        name: include_past
+        type: boolean
       produces:
       - application/json
       responses:
@@ -1268,6 +1280,11 @@ paths:
         in: query
         name: limit
         type: integer
+      - default: true
+        description: Include events whose date has already passed
+        in: query
+        name: include_past
+        type: boolean
       produces:
       - application/json
       responses:
@@ -1706,6 +1723,31 @@ paths:
       security:
       - CookieAuth: []
       summary: Update profile
+      tags:
+      - user
+  /user/stats:
+    get:
+      description: Returns the authenticated user's paid order count and total amount
+        spent.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/tixora_internal_dto.UserStatsResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Get order stats
       tags:
       - user
 securityDefinitions:

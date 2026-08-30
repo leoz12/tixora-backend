@@ -16,9 +16,9 @@ const (
 
 // IEventService contains event catalog business logic.
 type IEventService interface {
-	GetEvents(ctx context.Context, page, limit int, categoryID, search string) ([]models.Event, int64, error)
+	GetEvents(ctx context.Context, page, limit int, categoryID, search string, includePast bool) ([]models.Event, int64, error)
 	GetEventByID(ctx context.Context, id string) (*models.Event, error)
-	SearchEvents(ctx context.Context, query string, page, limit int) ([]models.Event, int64, error)
+	SearchEvents(ctx context.Context, query string, page, limit int, includePast bool) ([]models.Event, int64, error)
 	CreateEvent(ctx context.Context, event *models.Event) error
 	UpdateEvent(ctx context.Context, event *models.Event) error
 	DeleteEvent(ctx context.Context, id string) error
@@ -34,7 +34,7 @@ func NewEventService(repo repository.IEventRepository, categoryRepo repository.I
 	return &EventService{repo: repo, categoryRepo: categoryRepo, fileRepo: fileRepo}
 }
 
-func (s *EventService) GetEvents(ctx context.Context, page, limit int, categoryID, search string) ([]models.Event, int64, error) {
+func (s *EventService) GetEvents(ctx context.Context, page, limit int, categoryID, search string, includePast bool) ([]models.Event, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -43,7 +43,7 @@ func (s *EventService) GetEvents(ctx context.Context, page, limit int, categoryI
 	}
 
 	offset := (page - 1) * limit
-	events, total, err := s.repo.GetWithPagination(ctx, offset, limit, categoryID, search)
+	events, total, err := s.repo.GetWithPagination(ctx, offset, limit, categoryID, search, includePast)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to fetch events: %w", err)
 	}
@@ -51,7 +51,7 @@ func (s *EventService) GetEvents(ctx context.Context, page, limit int, categoryI
 	return events, total, nil
 }
 
-func (s *EventService) SearchEvents(ctx context.Context, query string, page, limit int) ([]models.Event, int64, error) {
+func (s *EventService) SearchEvents(ctx context.Context, query string, page, limit int, includePast bool) ([]models.Event, int64, error) {
 	if query == "" {
 		return nil, 0, fmt.Errorf("%w: search query is required", utils.ErrInvalidInput)
 	}
@@ -63,7 +63,7 @@ func (s *EventService) SearchEvents(ctx context.Context, query string, page, lim
 	}
 
 	offset := (page - 1) * limit
-	events, total, err := s.repo.Search(ctx, query, offset, limit)
+	events, total, err := s.repo.Search(ctx, query, offset, limit, includePast)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to search events: %w", err)
 	}

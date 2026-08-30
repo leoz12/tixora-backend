@@ -31,6 +31,23 @@ func TestE2E_Events_PublicListAndGet(t *testing.T) {
 	assert.Equal(t, category.ID, single.Data.CategoryID)
 }
 
+func TestE2E_Events_ListDefaultsToIncludingPastEvents(t *testing.T) {
+	app := newTestApp(t)
+	category := app.seedCategory(t, "cat-1", "Music", "music")
+	app.seedEventAt(t, "evt-past", category.ID, 50, time.Now().Add(-48*time.Hour))
+	app.seedEventAt(t, "evt-future", category.ID, 50, time.Now().Add(48*time.Hour))
+
+	var withPast dto.ListResponse
+	rec := app.do(t, http.MethodGet, "/api/events", nil, nil, &withPast)
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.EqualValues(t, 2, withPast.Pagination.TotalItems)
+
+	var upcomingOnly dto.ListResponse
+	rec = app.do(t, http.MethodGet, "/api/events?include_past=false", nil, nil, &upcomingOnly)
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.EqualValues(t, 1, upcomingOnly.Pagination.TotalItems)
+}
+
 func TestE2E_Events_GetByID_NotFound(t *testing.T) {
 	app := newTestApp(t)
 

@@ -1175,6 +1175,13 @@ const docTemplate = `{
                         "description": "Free-text search on title/location",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Include events whose date has already passed",
+                        "name": "include_past",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1305,6 +1312,13 @@ const docTemplate = `{
                         "default": 12,
                         "description": "Items per page",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Include events whose date has already passed",
+                        "name": "include_past",
                         "in": "query"
                     }
                 ],
@@ -2199,6 +2213,49 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/user/stats": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Returns the authenticated user's paid order count and total amount spent.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get order stats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/tixora_internal_dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/tixora_internal_dto.UserStatsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/tixora_internal_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2743,6 +2800,17 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "tixora_internal_dto.UserStatsResponse": {
+            "type": "object",
+            "properties": {
+                "total_orders": {
+                    "type": "integer"
+                },
+                "total_spent": {
+                    "type": "integer"
                 }
             }
         }

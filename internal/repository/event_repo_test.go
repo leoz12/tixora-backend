@@ -58,7 +58,7 @@ func TestEventRepository_GetWithPagination_FiltersByCategory(t *testing.T) {
 		TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-2",
 	}))
 
-	events, total, err := eventRepo.GetWithPagination(ctx, 0, 10, "cat-1", "")
+	events, total, err := eventRepo.GetWithPagination(ctx, 0, 10, "cat-1", "", true)
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, total)
 	require.Len(t, events, 1)
@@ -83,11 +83,67 @@ func TestEventRepository_GetWithPagination_OrdersByEventDateAscending(t *testing
 		TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
 	}))
 
-	events, _, err := eventRepo.GetWithPagination(ctx, 0, 10, "", "")
+	events, _, err := eventRepo.GetWithPagination(ctx, 0, 10, "", "", true)
 	require.NoError(t, err)
 	require.Len(t, events, 2)
 	assert.Equal(t, "evt-sooner", events[0].ID)
 	assert.Equal(t, "evt-later", events[1].ID)
+}
+
+func TestEventRepository_GetWithPagination_ExcludesPastEventsWhenIncludePastFalse(t *testing.T) {
+	db := requireDB(t)
+	ctx := context.Background()
+	catRepo := repository.NewCategoryRepository(db)
+	require.NoError(t, catRepo.Create(ctx, newTestCategory("cat-1", "Music", "music", true)))
+
+	eventRepo := repository.NewEventRepository(db)
+	require.NoError(t, eventRepo.Create(ctx, &models.Event{
+		ID: "evt-past", Title: "Past Show", EventDate: time.Now().Add(-24 * time.Hour), Price: 1000,
+		TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
+	}))
+	require.NoError(t, eventRepo.Create(ctx, &models.Event{
+		ID: "evt-future", Title: "Future Show", EventDate: time.Now().Add(24 * time.Hour), Price: 1000,
+		TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
+	}))
+
+	upcoming, total, err := eventRepo.GetWithPagination(ctx, 0, 10, "", "", false)
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, total)
+	require.Len(t, upcoming, 1)
+	assert.Equal(t, "evt-future", upcoming[0].ID)
+
+	all, total, err := eventRepo.GetWithPagination(ctx, 0, 10, "", "", true)
+	require.NoError(t, err)
+	assert.EqualValues(t, 2, total)
+	require.Len(t, all, 2)
+}
+
+func TestEventRepository_Search_ExcludesPastEventsWhenIncludePastFalse(t *testing.T) {
+	db := requireDB(t)
+	ctx := context.Background()
+	catRepo := repository.NewCategoryRepository(db)
+	require.NoError(t, catRepo.Create(ctx, newTestCategory("cat-1", "Music", "music", true)))
+
+	eventRepo := repository.NewEventRepository(db)
+	require.NoError(t, eventRepo.Create(ctx, &models.Event{
+		ID: "evt-past", Title: "Jazz Past", Location: "Bandung", EventDate: time.Now().Add(-24 * time.Hour),
+		Price: 1000, TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
+	}))
+	require.NoError(t, eventRepo.Create(ctx, &models.Event{
+		ID: "evt-future", Title: "Jazz Future", Location: "Bandung", EventDate: time.Now().Add(24 * time.Hour),
+		Price: 1000, TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
+	}))
+
+	upcoming, total, err := eventRepo.Search(ctx, "Jazz", 0, 10, false)
+	require.NoError(t, err)
+	assert.EqualValues(t, 1, total)
+	require.Len(t, upcoming, 1)
+	assert.Equal(t, "evt-future", upcoming[0].ID)
+
+	all, total, err := eventRepo.Search(ctx, "Jazz", 0, 10, true)
+	require.NoError(t, err)
+	assert.EqualValues(t, 2, total)
+	require.Len(t, all, 2)
 }
 
 func TestEventRepository_Search_MatchesTitleOrLocation(t *testing.T) {
@@ -106,13 +162,13 @@ func TestEventRepository_Search_MatchesTitleOrLocation(t *testing.T) {
 		Price: 1000, TotalTickets: 10, AvailableTickets: 10, CategoryID: "cat-1",
 	}))
 
-	byTitle, total, err := eventRepo.Search(ctx, "Jazz", 0, 10)
+	byTitle, total, err := eventRepo.Search(ctx, "Jazz", 0, 10, true)
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, total)
 	require.Len(t, byTitle, 1)
 	assert.Equal(t, "evt-1", byTitle[0].ID)
 
-	byLocation, total, err := eventRepo.Search(ctx, "Jakarta", 0, 10)
+	byLocation, total, err := eventRepo.Search(ctx, "Jakarta", 0, 10, true)
 	require.NoError(t, err)
 	assert.EqualValues(t, 1, total)
 	require.Len(t, byLocation, 1)

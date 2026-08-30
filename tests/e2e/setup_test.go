@@ -274,8 +274,13 @@ func (a *testApp) seedCategory(t *testing.T, id, name, slug string) *models.Cate
 
 func (a *testApp) seedEvent(t *testing.T, id, categoryID string, availableTickets int) *models.Event {
 	t.Helper()
+	return a.seedEventAt(t, id, categoryID, availableTickets, time.Now().Add(24*time.Hour))
+}
+
+func (a *testApp) seedEventAt(t *testing.T, id, categoryID string, availableTickets int, eventDate time.Time) *models.Event {
+	t.Helper()
 	event := &models.Event{
-		ID: id, Title: "Test Event " + id, EventDate: time.Now().Add(24 * time.Hour),
+		ID: id, Title: "Test Event " + id, EventDate: eventDate,
 		Location: "Jakarta", Price: 100000, TotalTickets: availableTickets,
 		AvailableTickets: availableTickets, CategoryID: categoryID,
 	}

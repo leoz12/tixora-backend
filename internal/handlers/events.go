@@ -34,6 +34,7 @@ func NewEventHandler(eventService services.IEventService, imageBaseURL string) *
 //	@Param			limit		query		int		false	"Items per page"	default(12)
 //	@Param			category_id	query		string	false	"Exact category ID filter"
 //	@Param			search		query		string	false	"Free-text search on title/location"
+//	@Param			include_past	query		bool	false	"Include events whose date has already passed"	default(true)
 //	@Success		200			{object}	dto.ListResponse{data=[]dto.EventResponse}
 //	@Failure		500			{object}	dto.ErrorResponse
 //	@Router			/events [get]
@@ -42,8 +43,9 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	limit := parseIntQuery(c, "limit", 12)
 	categoryID := c.Query("category_id")
 	search := c.Query("search")
+	includePast := parseBoolQuery(c, "include_past", true)
 
-	events, total, err := h.eventService.GetEvents(c.Request.Context(), page, limit, categoryID, search)
+	events, total, err := h.eventService.GetEvents(c.Request.Context(), page, limit, categoryID, search, includePast)
 	if err != nil {
 		respondError(c, err, "Failed to fetch events")
 		return
@@ -83,6 +85,7 @@ func (h *EventHandler) GetEventByID(c *gin.Context) {
 //	@Param			q		query		string	true	"Search query"
 //	@Param			page	query		int		false	"Page number"		default(1)
 //	@Param			limit	query		int		false	"Items per page"	default(12)
+//	@Param			include_past	query	bool	false	"Include events whose date has already passed"	default(true)
 //	@Success		200		{object}	dto.ListResponse{data=[]dto.EventResponse}
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Router			/events/search [get]
@@ -95,8 +98,9 @@ func (h *EventHandler) SearchEvents(c *gin.Context) {
 
 	page := parseIntQuery(c, "page", 1)
 	limit := parseIntQuery(c, "limit", 12)
+	includePast := parseBoolQuery(c, "include_past", true)
 
-	events, total, err := h.eventService.SearchEvents(c.Request.Context(), query, page, limit)
+	events, total, err := h.eventService.SearchEvents(c.Request.Context(), query, page, limit, includePast)
 	if err != nil {
 		respondError(c, err, "Failed to search events")
 		return
@@ -223,6 +227,21 @@ func eventFromRequest(req *dto.EventRequest) *models.Event {
 // when it is missing or malformed. Range validation is left to the service layer.
 func parseIntQuery(c *gin.Context, key string, defaultValue int) int {
 	value, err := strconv.Atoi(c.Query(key))
+	if err != nil {
+		return defaultValue
+	}
+	return value
+}
+
+// parseBoolQuery reads a boolean query parameter, falling back to defaultValue
+// when it is missing or malformed. Accepts the usual strconv.ParseBool forms
+// (1/t/true/0/f/false, case-insensitive).
+func parseBoolQuery(c *gin.Context, key string, defaultValue bool) bool {
+	raw := c.Query(key)
+	if raw == "" {
+		return defaultValue
+	}
+	value, err := strconv.ParseBool(raw)
 	if err != nil {
 		return defaultValue
 	}

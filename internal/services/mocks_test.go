@@ -143,16 +143,16 @@ func categoryOrNil(v interface{}) *models.Category {
 
 type mockEventRepo struct{ mock.Mock }
 
-func (m *mockEventRepo) GetWithPagination(ctx context.Context, offset, limit int, categoryID, search string) ([]models.Event, int64, error) {
-	args := m.Called(ctx, offset, limit, categoryID, search)
+func (m *mockEventRepo) GetWithPagination(ctx context.Context, offset, limit int, categoryID, search string, includePast bool) ([]models.Event, int64, error) {
+	args := m.Called(ctx, offset, limit, categoryID, search, includePast)
 	return sliceOrNil[models.Event](args.Get(0)), int64(args.Int(1)), args.Error(2)
 }
 func (m *mockEventRepo) GetByID(ctx context.Context, id string) (*models.Event, error) {
 	args := m.Called(ctx, id)
 	return eventOrNil(args.Get(0)), args.Error(1)
 }
-func (m *mockEventRepo) Search(ctx context.Context, query string, offset, limit int) ([]models.Event, int64, error) {
-	args := m.Called(ctx, query, offset, limit)
+func (m *mockEventRepo) Search(ctx context.Context, query string, offset, limit int, includePast bool) ([]models.Event, int64, error) {
+	args := m.Called(ctx, query, offset, limit, includePast)
 	return sliceOrNil[models.Event](args.Get(0)), int64(args.Int(1)), args.Error(2)
 }
 func (m *mockEventRepo) CountByCategoryID(ctx context.Context, categoryID string) (int64, error) {
