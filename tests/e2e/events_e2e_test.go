@@ -50,7 +50,7 @@ func TestE2E_Events_CreateRequiresAdminAuth(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestE2E_Events_CreateRequiresCSRFToken(t *testing.T) {
+func TestE2E_Events_CreateRejectsCrossSiteOrigin(t *testing.T) {
 	app := newTestApp(t)
 	app.seedAdmin(t, "admin-1", "admin@example.com", "password123", "admin")
 	cookies := app.adminCookies(t, "admin-1", "admin@example.com", "admin")
@@ -60,11 +60,12 @@ func TestE2E_Events_CreateRequiresCSRFToken(t *testing.T) {
 		"location": "Jakarta", "price": 1000, "total_tickets": 10, "category_id": "cat-1",
 	}
 
-	// Strip the CSRF header - only the cookie is sent - which the
-	// double-submit check must reject.
-	noCSRF := cookies
-	noCSRF.csrfToken = ""
-	rec := app.do(t, http.MethodPost, "/api/events", req, &noCSRF, nil)
+	// A request carrying the auth cookie but originating from a page that
+	// isn't in the CORS allowlist is a cross-site (CSRF) attempt and must be
+	// rejected.
+	crossSite := cookies
+	crossSite.origin = "https://evil.example"
+	rec := app.do(t, http.MethodPost, "/api/events", req, &crossSite, nil)
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 

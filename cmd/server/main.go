@@ -18,7 +18,6 @@ import (
 	"tixora/internal/middleware"
 	"tixora/internal/repository"
 	"tixora/internal/services"
-	"tixora/internal/utils"
 )
 
 // @title						Tixora API
@@ -127,7 +126,7 @@ func main() {
 
 			authProtected := auth.Group("")
 			authProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-			authProtected.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+			authProtected.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 			{
 				authProtected.GET("/me", authHandler.GetCurrentUser)
 				authProtected.POST("/logout", authHandler.Logout)
@@ -144,7 +143,7 @@ func main() {
 			// Event mutation routes (admin only)
 			eventsProtected := events.Group("")
 			eventsProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret))
-			eventsProtected.Use(middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+			eventsProtected.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 			{
 				eventsProtected.POST("", eventHandler.CreateEvent)
 				eventsProtected.PUT("/:id", eventHandler.UpdateEvent)
@@ -155,7 +154,7 @@ func main() {
 		// File routes (admin only for now - only event covers use these today)
 		files := api.Group("/files")
 		files.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret))
-		files.Use(middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+		files.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			files.POST("/presign-upload", fileHandler.PresignUpload)
 		}
@@ -168,7 +167,7 @@ func main() {
 
 			categoriesProtected := categories.Group("")
 			categoriesProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret))
-			categoriesProtected.Use(middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+			categoriesProtected.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 			{
 				categoriesProtected.POST("", categoryHandler.CreateCategory)
 				categoriesProtected.PUT("/:id", categoryHandler.UpdateCategory)
@@ -179,7 +178,7 @@ func main() {
 		// Order routes (protected)
 		orders := api.Group("/orders")
 		orders.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		orders.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		orders.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			orders.POST("", orderHandler.CreateOrder)
 			orders.GET("", orderHandler.GetUserOrders)
@@ -197,7 +196,7 @@ func main() {
 
 			paymentsProtected := payments.Group("")
 			paymentsProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-			paymentsProtected.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+			paymentsProtected.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 			{
 				paymentsProtected.GET("/status/:transactionId", paymentHandler.GetPaymentStatus)
 			}
@@ -206,7 +205,7 @@ func main() {
 		// User routes (protected)
 		user := api.Group("/user")
 		user.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		user.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		user.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
@@ -221,7 +220,7 @@ func main() {
 
 			adminProtected := admin.Group("")
 			adminProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret))
-			adminProtected.Use(middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+			adminProtected.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 			{
 				adminProtected.GET("/auth/me", adminHandler.GetCurrentAdmin)
 				adminProtected.POST("/auth/logout", adminHandler.Logout)

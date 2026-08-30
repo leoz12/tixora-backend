@@ -46,15 +46,12 @@ func (h *AdminHandler) Login(c *gin.Context) {
 		return
 	}
 
-	if _, err := utils.SetAuthCookies(
+	utils.SetAuthCookies(
 		c, h.cfg,
-		utils.AdminAccessCookie, utils.AdminRefreshCookie, utils.AdminCSRFCookie,
+		utils.AdminAccessCookie, utils.AdminRefreshCookie,
 		accessToken, refreshToken,
 		h.cfg.JWTAccessExpiry, h.cfg.JWTRefreshExpiry,
-	); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to establish session", err))
-		return
-	}
+	)
 
 	c.JSON(http.StatusOK, dto.NewSuccessResponse("Login successful", dto.NewAdminAuthResponse(admin)))
 }
@@ -73,20 +70,17 @@ func (h *AdminHandler) RefreshToken(c *gin.Context) {
 
 	accessToken, refreshToken, admin, err := h.adminService.RefreshToken(c.Request.Context(), rawRefreshToken)
 	if err != nil {
-		utils.ClearAuthCookies(c, h.cfg, utils.AdminAccessCookie, utils.AdminRefreshCookie, utils.AdminCSRFCookie)
+		utils.ClearAuthCookies(c, h.cfg, utils.AdminAccessCookie, utils.AdminRefreshCookie)
 		respondError(c, err, "Failed to refresh session")
 		return
 	}
 
-	if _, err := utils.SetAuthCookies(
+	utils.SetAuthCookies(
 		c, h.cfg,
-		utils.AdminAccessCookie, utils.AdminRefreshCookie, utils.AdminCSRFCookie,
+		utils.AdminAccessCookie, utils.AdminRefreshCookie,
 		accessToken, refreshToken,
 		h.cfg.JWTAccessExpiry, h.cfg.JWTRefreshExpiry,
-	); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("Failed to refresh session", err))
-		return
-	}
+	)
 
 	c.JSON(http.StatusOK, dto.NewSuccessResponse("", dto.NewAdminAuthResponse(admin)))
 }
@@ -107,7 +101,7 @@ func (h *AdminHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	utils.ClearAuthCookies(c, h.cfg, utils.AdminAccessCookie, utils.AdminRefreshCookie, utils.AdminCSRFCookie)
+	utils.ClearAuthCookies(c, h.cfg, utils.AdminAccessCookie, utils.AdminRefreshCookie)
 	c.JSON(http.StatusOK, dto.NewSuccessResponse("Logout successful", nil))
 }
 

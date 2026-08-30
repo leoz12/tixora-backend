@@ -117,14 +117,14 @@ func TestE2E_Orders_GetOtherUsersOrderForbidden(t *testing.T) {
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
-func TestE2E_Orders_CreateRequiresCSRFToken(t *testing.T) {
+func TestE2E_Orders_CreateRejectsCrossSiteOrigin(t *testing.T) {
 	app := newTestApp(t)
 	category := app.seedCategory(t, "cat-1", "Music", "music")
 	event := app.seedEvent(t, "evt-1", category.ID, 10)
 	app.seedUser(t, "user-1", "jane@example.com")
 
 	cookies := app.userCookies(t, "user-1", "jane@example.com")
-	cookies.csrfToken = "" // header omitted, only the cookie is sent
+	cookies.origin = "https://evil.example" // cross-site request, not in the CORS allowlist
 
 	req := map[string]interface{}{
 		"event_id": event.ID, "quantity": 1, "buyer_name": "Jane Doe", "buyer_email": "jane@example.com",

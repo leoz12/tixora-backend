@@ -14,44 +14,34 @@ import (
 const (
 	UserAccessCookie  = "tx_access_token"
 	UserRefreshCookie = "tx_refresh_token"
-	UserCSRFCookie    = "tx_csrf_token"
 
 	AdminAccessCookie  = "tx_admin_access_token"
 	AdminRefreshCookie = "tx_admin_refresh_token"
-	AdminCSRFCookie    = "tx_admin_csrf_token"
 )
 
-// csrfTokenBytes is the entropy used for the double-submit CSRF cookie.
-const csrfTokenBytes = 32
-
-// SetAuthCookies sets the access, refresh, and CSRF cookies for a session and
-// returns the raw CSRF token (handlers don't need it, but it's handy for
-// tests). accessCookie/refreshCookie/csrfCookie pick which name triple to use
-// - the User* or Admin* constants above.
+// SetAuthCookies sets the access and refresh cookies for a session.
+// accessCookie/refreshCookie pick which name pair to use - the User* or
+// Admin* constants above.
+//
+// There's no CSRF cookie: the frontend/admin SPA lives on a different
+// registrable domain than the API, so its JavaScript can't read a
+// double-submit cookie to echo it back. CSRF is enforced by an Origin/Referer
+// allowlist instead (see internal/middleware/csrf.go).
 func SetAuthCookies(
 	c *gin.Context,
 	cfg *config.Config,
-	accessCookie, refreshCookie, csrfCookie string,
+	accessCookie, refreshCookie string,
 	accessToken, refreshToken string,
 	accessExpiry, refreshExpiry time.Duration,
-) (string, error) {
-	csrfToken, err := GenerateRandomToken(csrfTokenBytes)
-	if err != nil {
-		return "", err
-	}
-
+) {
 	setCookie(c, cfg, accessCookie, accessToken, int(accessExpiry.Seconds()), true)
 	setCookie(c, cfg, refreshCookie, refreshToken, int(refreshExpiry.Seconds()), true)
-	setCookie(c, cfg, csrfCookie, csrfToken, int(refreshExpiry.Seconds()), false)
-
-	return csrfToken, nil
 }
 
-// ClearAuthCookies expires the access/refresh/CSRF cookies (used on logout).
-func ClearAuthCookies(c *gin.Context, cfg *config.Config, accessCookie, refreshCookie, csrfCookie string) {
+// ClearAuthCookies expires the access/refresh cookies (used on logout).
+func ClearAuthCookies(c *gin.Context, cfg *config.Config, accessCookie, refreshCookie string) {
 	setCookie(c, cfg, accessCookie, "", -1, true)
 	setCookie(c, cfg, refreshCookie, "", -1, true)
-	setCookie(c, cfg, csrfCookie, "", -1, false)
 }
 
 // setCookie centralizes the flags every auth cookie needs: frontend, admin,

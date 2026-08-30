@@ -180,7 +180,7 @@ func newTestApp(t *testing.T) *testApp {
 		auth.POST("/oauth/google/callback", authHandler.GoogleCallback)
 		auth.POST("/refresh", authHandler.RefreshToken)
 		authProtected := auth.Group("")
-		authProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		authProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			authProtected.GET("/me", authHandler.GetCurrentUser)
 			authProtected.POST("/logout", authHandler.Logout)
@@ -191,7 +191,7 @@ func newTestApp(t *testing.T) *testApp {
 		events.GET("/search", eventHandler.SearchEvents)
 		events.GET("/:id", eventHandler.GetEventByID)
 		eventsProtected := events.Group("")
-		eventsProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+		eventsProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			eventsProtected.POST("", eventHandler.CreateEvent)
 			eventsProtected.PUT("/:id", eventHandler.UpdateEvent)
@@ -202,7 +202,7 @@ func newTestApp(t *testing.T) *testApp {
 		categories.GET("", categoryHandler.ListCategories)
 		categories.GET("/:id", categoryHandler.GetCategoryByID)
 		categoriesProtected := categories.Group("")
-		categoriesProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+		categoriesProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			categoriesProtected.POST("", categoryHandler.CreateCategory)
 			categoriesProtected.PUT("/:id", categoryHandler.UpdateCategory)
@@ -211,7 +211,7 @@ func newTestApp(t *testing.T) *testApp {
 
 		orders := api.Group("/orders")
 		orders.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		orders.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		orders.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			orders.POST("", orderHandler.CreateOrder)
 			orders.GET("", orderHandler.GetUserOrders)
@@ -225,14 +225,14 @@ func newTestApp(t *testing.T) *testApp {
 		payments := api.Group("/payments")
 		payments.POST("/webhook", paymentHandler.WebhookHandler)
 		paymentsProtected := payments.Group("")
-		paymentsProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		paymentsProtected.Use(middleware.AuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			paymentsProtected.GET("/status/:transactionId", paymentHandler.GetPaymentStatus)
 		}
 
 		user := api.Group("/user")
 		user.Use(middleware.AuthMiddleware(cfg.JWTSecret))
-		user.Use(middleware.CSRFMiddleware(utils.UserCSRFCookie))
+		user.Use(middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
@@ -243,7 +243,7 @@ func newTestApp(t *testing.T) *testApp {
 		admin.POST("/auth/login", adminHandler.Login)
 		admin.POST("/auth/refresh", adminHandler.RefreshToken)
 		adminProtected := admin.Group("")
-		adminProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(utils.AdminCSRFCookie))
+		adminProtected.Use(middleware.AdminAuthMiddleware(cfg.JWTSecret), middleware.CSRFMiddleware(cfg.CORSOrigins))
 		{
 			adminProtected.GET("/auth/me", adminHandler.GetCurrentAdmin)
 			adminProtected.POST("/auth/logout", adminHandler.Logout)
@@ -307,20 +307,21 @@ func (a *testApp) seedAdmin(t *testing.T, id, email, password, role string) *mod
 	return admin
 }
 
-// authedCookies mints a valid access-token + CSRF cookie pair directly
-// (bypassing the Google OAuth / admin-password login flow) for a seeded
-// principal, and returns them ready to attach to an *http.Request alongside
-// the matching X-CSRF-Token header value.
+// authedCookies mints a valid access-token cookie directly (bypassing the
+// Google OAuth / admin-password login flow) for a seeded principal, ready to
+// attach to an *http.Request. Set origin to a value to simulate a browser
+// request from that page - CSRF protection is an Origin/Referer allowlist
+// check, so a disallowed origin is how a cross-site (CSRF) attempt is modeled.
 type authedCookies struct {
 	accessCookie *http.Cookie
-	csrfCookie   *http.Cookie
-	csrfToken    string
+	origin       string
 }
 
 func (c authedCookies) attach(req *http.Request) {
 	req.AddCookie(c.accessCookie)
-	req.AddCookie(c.csrfCookie)
-	req.Header.Set("X-CSRF-Token", c.csrfToken)
+	if c.origin != "" {
+		req.Header.Set("Origin", c.origin)
+	}
 }
 
 func (a *testApp) userCookies(t *testing.T, userID, email string) authedCookies {
@@ -331,8 +332,6 @@ func (a *testApp) userCookies(t *testing.T, userID, email string) authedCookies 
 	}
 	return authedCookies{
 		accessCookie: &http.Cookie{Name: utils.UserAccessCookie, Value: token},
-		csrfCookie:   &http.Cookie{Name: utils.UserCSRFCookie, Value: "user-csrf-token"},
-		csrfToken:    "user-csrf-token",
 	}
 }
 
@@ -344,8 +343,6 @@ func (a *testApp) adminCookies(t *testing.T, adminID, email, role string) authed
 	}
 	return authedCookies{
 		accessCookie: &http.Cookie{Name: utils.AdminAccessCookie, Value: token},
-		csrfCookie:   &http.Cookie{Name: utils.AdminCSRFCookie, Value: "admin-csrf-token"},
-		csrfToken:    "admin-csrf-token",
 	}
 }
 
