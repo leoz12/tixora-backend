@@ -131,6 +131,44 @@ func (h *AdminHandler) GetCurrentAdmin(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.NewSuccessResponse("", dto.NewAdminResponse(admin)))
 }
 
+// ChangePassword handles POST /api/admin/auth/change-password (protected)
+//
+//	@Summary		Change own password
+//	@Description	Changes the currently authenticated admin's password. Requires the current password. On success every admin session (including this one) is revoked and the session cookies are cleared, so the client must log in again.
+//	@Tags			admin
+//	@Accept			json
+//	@Produce		json
+//	@Security		CookieAuth
+//	@Param			request	body		dto.ChangeAdminPasswordRequest	true	"Current and new password"
+//	@Success		200		{object}	dto.SuccessResponse
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		401		{object}	dto.ErrorResponse
+//	@Router			/admin/auth/change-password [post]
+func (h *AdminHandler) ChangePassword(c *gin.Context) {
+	adminID := c.GetString("admin_id")
+	if adminID == "" {
+		c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("Missing authenticated admin", nil))
+		return
+	}
+
+	var req dto.ChangeAdminPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.NewErrorResponse("Invalid request body", err))
+		return
+	}
+
+	if err := h.adminService.ChangePassword(c.Request.Context(), adminID, req.CurrentPassword, req.NewPassword); err != nil {
+		respondError(c, err, "Failed to change password")
+		return
+	}
+
+	// The change revoked every refresh token for this admin. Clear the
+	// session cookies so the client falls back through the login flow.
+	utils.ClearAuthCookies(c, h.cfg, utils.AdminAccessCookie, utils.AdminRefreshCookie)
+
+	c.JSON(http.StatusOK, dto.NewSuccessResponse("Password changed. Please log in again.", nil))
+}
+
 // ListAdmins handles GET /api/admin/admins (protected)
 //
 //	@Summary		List admins

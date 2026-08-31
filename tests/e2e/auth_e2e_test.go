@@ -77,6 +77,41 @@ func TestE2E_AdminAuth_LoginSuccessAndFailure(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
+func TestE2E_AdminAuth_ChangePasswordFlow(t *testing.T) {
+	app := newTestApp(t)
+	app.seedAdmin(t, "admin-1", "admin@example.com", "old-password1", "admin")
+	cookies := app.adminCookies(t, "admin-1", "admin@example.com", "admin")
+
+	// Wrong current password is rejected.
+	rec := app.do(t, http.MethodPost, "/api/admin/auth/change-password", map[string]string{
+		"current_password": "not-the-password", "new_password": "brand-new-password1",
+	}, &cookies, nil)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	// Correct current password succeeds and clears the session cookies.
+	rec = app.do(t, http.MethodPost, "/api/admin/auth/change-password", map[string]string{
+		"current_password": "old-password1", "new_password": "brand-new-password1",
+	}, &cookies, nil)
+	require.Equal(t, http.StatusOK, rec.Code)
+
+	var accessCleared bool
+	for _, c := range rec.Result().Cookies() {
+		if c.Name == "tx_admin_access_token" {
+			accessCleared = c.MaxAge < 0
+		}
+	}
+	assert.True(t, accessCleared, "changing password must clear the admin access cookie")
+
+	// Old password no longer logs in; the new one does.
+	rec = app.do(t, http.MethodPost, "/api/admin/auth/login",
+		map[string]string{"email": "admin@example.com", "password": "old-password1"}, nil, nil)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	rec = app.do(t, http.MethodPost, "/api/admin/auth/login",
+		map[string]string{"email": "admin@example.com", "password": "brand-new-password1"}, nil, nil)
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
 func TestE2E_AdminAuth_ProtectedRoutesRequireAdminAuth(t *testing.T) {
 	app := newTestApp(t)
 

@@ -200,6 +200,63 @@ func TestAdminService_UpdateAdmin_ShortPasswordRejected(t *testing.T) {
 	assert.ErrorIs(t, err, utils.ErrInvalidInput)
 }
 
+func TestAdminService_ChangePassword_WrongCurrentPasswordRejected(t *testing.T) {
+	hash, err := utils.HashPassword("current-password")
+	require.NoError(t, err)
+
+	repo := new(mockAdminRepo)
+	repo.On("GetByID", mock.Anything, "admin-1").
+		Return(&models.Admin{ID: "admin-1", PasswordHash: hash}, nil)
+
+	svc := newAdminService(repo, new(mockRefreshTokenRepo))
+
+	err = svc.ChangePassword(context.Background(), "admin-1", "wrong-password", "newpassword1")
+	assert.ErrorIs(t, err, utils.ErrUnauthorized)
+}
+
+func TestAdminService_ChangePassword_ShortNewPasswordRejected(t *testing.T) {
+	svc := newAdminService(new(mockAdminRepo), new(mockRefreshTokenRepo))
+
+	err := svc.ChangePassword(context.Background(), "admin-1", "current-password", "short")
+	assert.ErrorIs(t, err, utils.ErrInvalidInput)
+}
+
+func TestAdminService_ChangePassword_SamePasswordRejected(t *testing.T) {
+	hash, err := utils.HashPassword("current-password")
+	require.NoError(t, err)
+
+	repo := new(mockAdminRepo)
+	repo.On("GetByID", mock.Anything, "admin-1").
+		Return(&models.Admin{ID: "admin-1", PasswordHash: hash}, nil)
+
+	svc := newAdminService(repo, new(mockRefreshTokenRepo))
+
+	err = svc.ChangePassword(context.Background(), "admin-1", "current-password", "current-password")
+	assert.ErrorIs(t, err, utils.ErrInvalidInput)
+}
+
+func TestAdminService_ChangePassword_SuccessRevokesAllSessions(t *testing.T) {
+	hash, err := utils.HashPassword("current-password")
+	require.NoError(t, err)
+
+	repo := new(mockAdminRepo)
+	repo.On("GetByID", mock.Anything, "admin-1").
+		Return(&models.Admin{ID: "admin-1", PasswordHash: hash}, nil)
+	repo.On("Update", mock.Anything, mock.MatchedBy(func(a *models.Admin) bool {
+		return a.ID == "admin-1" && utils.CheckPassword("newpassword1", a.PasswordHash)
+	})).Return(nil)
+
+	refreshRepo := new(mockRefreshTokenRepo)
+	refreshRepo.On("RevokeAllForSubject", mock.Anything, "admin-1", models.SubjectTypeAdmin).Return(nil)
+
+	svc := newAdminService(repo, refreshRepo)
+
+	err = svc.ChangePassword(context.Background(), "admin-1", "current-password", "newpassword1")
+	require.NoError(t, err)
+	repo.AssertExpectations(t)
+	refreshRepo.AssertCalled(t, "RevokeAllForSubject", mock.Anything, "admin-1", models.SubjectTypeAdmin)
+}
+
 func TestAdminService_DeleteAdmin_NotFound(t *testing.T) {
 	repo := new(mockAdminRepo)
 	repo.On("GetByID", mock.Anything, "missing").Return(nil, nil)

@@ -61,6 +61,17 @@ definitions:
       updated_at:
         type: string
     type: object
+  tixora_internal_dto.ChangeAdminPasswordRequest:
+    properties:
+      current_password:
+        type: string
+      new_password:
+        minLength: 8
+        type: string
+    required:
+    - current_password
+    - new_password
+    type: object
   tixora_internal_dto.CreateAdminRequest:
     properties:
       email:
@@ -528,6 +539,41 @@ paths:
       security:
       - CookieAuth: []
       summary: Update admin
+      tags:
+      - admin
+  /admin/auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Changes the currently authenticated admin's password. Requires
+        the current password. On success every admin session (including this one)
+        is revoked and the session cookies are cleared, so the client must log in
+        again.
+      parameters:
+      - description: Current and new password
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/tixora_internal_dto.ChangeAdminPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/tixora_internal_dto.ErrorResponse'
+      security:
+      - CookieAuth: []
+      summary: Change own password
       tags:
       - admin
   /admin/auth/login:

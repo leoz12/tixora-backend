@@ -28,6 +28,7 @@ type IAdminService interface {
 	EnsureBootstrapAdmin(ctx context.Context, email, name, password string) error
 	CreateAdmin(ctx context.Context, email, name, password, role string) (*models.Admin, error)
 	UpdateAdmin(ctx context.Context, id, name, password, role string) (*models.Admin, error)
+	ChangePassword(ctx context.Context, id, currentPassword, newPassword string) error
 	DeleteAdmin(ctx context.Context, id string) error
 }
 
@@ -302,6 +303,53 @@ func (s *AdminService) UpdateAdmin(ctx context.Context, id, name, password, role
 	}
 
 	return admin, nil
+}
+
+// ChangePassword lets an authenticated admin rotate their own password. It
+// verifies the current password, rejects a no-op change, then revokes every
+// refresh token for that admin so all other sessions are forced to
+// re-authenticate with the new credentials.
+func (s *AdminService) ChangePassword(ctx context.Context, id, currentPassword, newPassword string) error {
+	if id == "" {
+		return fmt.Errorf("%w: admin id is required", utils.ErrInvalidInput)
+	}
+	if currentPassword == "" {
+		return fmt.Errorf("%w: current password is required", utils.ErrInvalidInput)
+	}
+	if len(newPassword) < minAdminPasswordLen {
+		return fmt.Errorf("%w: password must be at least %d characters", utils.ErrInvalidInput, minAdminPasswordLen)
+	}
+
+	admin, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to fetch admin: %w", err)
+	}
+	if admin == nil {
+		return fmt.Errorf("%w: admin", utils.ErrNotFound)
+	}
+
+	if !utils.CheckPassword(currentPassword, admin.PasswordHash) {
+		return fmt.Errorf("%w: current password is incorrect", utils.ErrUnauthorized)
+	}
+	if currentPassword == newPassword {
+		return fmt.Errorf("%w: new password must be different from the current password", utils.ErrInvalidInput)
+	}
+
+	passwordHash, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+	admin.PasswordHash = passwordHash
+
+	if err := s.repo.Update(ctx, admin); err != nil {
+		return fmt.Errorf("failed to update admin: %w", err)
+	}
+
+	if err := s.refreshTokenRepo.RevokeAllForSubject(ctx, admin.ID, models.SubjectTypeAdmin); err != nil {
+		return fmt.Errorf("failed to revoke sessions after password change: %w", err)
+	}
+
+	return nil
 }
 
 func (s *AdminService) DeleteAdmin(ctx context.Context, id string) error {

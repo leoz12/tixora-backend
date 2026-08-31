@@ -224,6 +224,7 @@ func main() {
 			{
 				adminProtected.GET("/auth/me", adminHandler.GetCurrentAdmin)
 				adminProtected.POST("/auth/logout", adminHandler.Logout)
+				adminProtected.POST("/auth/change-password", adminHandler.ChangePassword)
 
 				adminProtected.GET("/admins", adminHandler.ListAdmins)
 				adminProtected.POST("/admins", adminHandler.CreateAdmin)
